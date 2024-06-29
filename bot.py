@@ -3,8 +3,9 @@ import mysql.connector
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
+from config import TOKEN
 
-TOKEN =  '7013331962:AAE1aYxb9UKew08Vzf-qdSrN2P443wo03wE'
+
 BOT_USERNAME = '@ppt_document_bot'
 UPLOADS_DIR = 'uploads'  # Directory to store uploaded files
 
