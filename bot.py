@@ -1,37 +1,24 @@
-from typing import Final
-import mysql.connector
-import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
-from config import TOKEN
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+import os
 
-
+TOKEN = '7013331962:AAE1aYxb9UKew08Vzf-qdSrN2P443wo03wE'
 BOT_USERNAME = '@ppt_document_bot'
-UPLOADS_DIR = 'uploads'  # Directory to store uploaded files
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="danya",
-    password="9d10a11b",
-    database="telegram_bot_db"
-)
-cursor = db.cursor()
+# Define the base directory where your files are located
+BASE_DIR = '/home/danyaabdella'
 
 def get_file_path(file_name: str) -> str:
-    cursor.execute("SELECT file_path FROM files WHERE file_name=%s", (file_name,))
-    result = cursor.fetchone()
-    if result:
-        return result[0]
-    return None
+    return os.path.join(BASE_DIR, f'{file_name}.zip')  # Assuming all your files are PDFs, adjust if necessary
+
 async def send_file(update: Update, context: ContextTypes.DEFAULT_TYPE, file_name: str):
     file_path = get_file_path(file_name)
-    
+
     if file_path and os.path.exists(file_path):
         with open(file_path, 'rb') as file:
             await context.bot.send_document(chat_id=update.effective_chat.id, document=file)
     else:
         await update.callback_query.message.reply_text(f'{file_name} file not found.')
-
 
 async def capture_chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat_id
@@ -51,28 +38,22 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Choose an option', reply_markup=reply_markup)
 
 async def PHP(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_file(update, context, 'PHP')
-    
-   
+    await send_file(update, context, 'PHP1')
 
 async def advanced(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_file(update, context, 'advanced')
 
-
-
 async def CV(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_file(update, context, 'CV')
 
-
 async def CG(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_file(update,context,'CG')
+    await send_file(update, context, 'CG')
 
 async def automata(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_file(update,context,'automata')
+    await send_file(update, context, 'automata')
 
 async def OS(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_file(update,context,'OS')
-
+    await send_file(update, context, 'OS')
 
 async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -118,15 +99,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 if __name__ == '__main__':
-    print('Starting bot...')
-    app = Application.builder().token(TOKEN).build()
+    while True:
+        print('Starting bot...')
+        app = Application.builder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler('start', start_command))
-    app.add_handler(CallbackQueryHandler(handle_button_click))
+        app.add_handler(CommandHandler('start', start_command))
+        app.add_handler(CallbackQueryHandler(handle_button_click))
 
-    # Messages
-    # app.add_handler(MessageHandler(filters.Text & ~filters.Command, handle_message, context_types=ContextTypes.DEFAULT_TYPE))  # Corrected filter usage
-    app.add_handler(MessageHandler(filters.ALL, capture_chat_id))   # Corrected filter usage
+        # Messages
+        app.add_handler(MessageHandler(filters.ALL, handle_message))
 
-    print('Polling...')
-    app.run_polling(poll_interval=3)
+        print('Polling...')
+        app.run_polling(poll_interval=3)
